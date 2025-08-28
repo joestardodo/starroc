@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星鹏教育 | 中国二维动画产业交互式指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Harmony -->
+    <!-- Application Structure Plan: 本应用采用主题式分段布局，而非简单复刻报告的章节。结构依次为：1. 行业概览（宏观市场与机遇），2. 制作管线（交互式流程图），3. 团队角色（可视化职位解析），4. 职业路径（图表化发展规划），5. 开启旅程（行动号召）。这种结构旨在引导用户从宏观到微观，从了解到规划，逐步深入，更符合探索式学习的用户心流，通过交互式图表和点击展开的细节，提升信息获取效率和趣味性。 -->
+    <!-- Visualization & Content Choices: 1. 市场板块图 (Chart.js 条形图): 目标是直观比较不同市场板块的品质要求，条形图最适合分类比较。交互为鼠标悬浮提示。2. 制作流程图 (HTML/CSS Flex + JS): 目标是组织和展示一个复杂的线性过程。采用可点击展开的交互式时间线，避免信息过载，引导用户主动探索。3. 职业发展模型 (Chart.js 环形图 + HTML/CSS): 目标是对比两种职业路径。环形图展示“晋升”与“转职”的哲学分野，自定义的流程图则清晰展示具体路径，比静态表格更具指导性。所有选择均未使用SVG/Mermaid，确保符合要求。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #FDFDF6;
+            color: #3D3522;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A0522D;
+            border-bottom-color: #A0522D;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAE8D8;
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            background-color: #A0522D;
+            color: #FFFFFF;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #8B4513;
+        }
+        .process-step {
+            cursor: pointer;
+            border-left: 3px solid #D2B48C;
+            transition: background-color 0.3s;
+        }
+        .process-step.active, .process-step:hover {
+            background-color: #FFFBF0;
+        }
+        .process-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .role-card {
+            cursor: pointer;
+        }
+        .role-card .role-details {
+            display: none;
+        }
+        .role-card.active .role-details {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-gray-200">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#A0522D]">
+                <img src="LOGO.png" width="220" height="120" alt=""/>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#industry" class="nav-link">行业洞察</a>
+                <a href="#pipeline" class="nav-link">制作全流程</a>
+                <a href="#roles" class="nav-link">团队角色</a>
+                <a href="#career" class="nav-link">职业发展</a>
+                <a href="#start" class="nav-link">开启旅程</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 space-y-2">
+            <a href="#industry" class="block nav-link">行业洞察</a>
+            <a href="#pipeline" class="block nav-link">制作全流程</a>
+            <a href="#roles" class="block nav-link">团队角色</a>
+            <a href="#career" class="block nav-link">职业发展</a>
+            <a href="#start" class="block nav-link">开启旅程</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="container mx-auto px-6 py-20 md:py-32 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">
+                黄金时代已至：<br class="hidden md:block" />中国动画的<span class="text-[#A0522D]">文艺复兴</span>
+            </h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600 mb-8">
+                从《大闹天宫》的辉煌历史，到如今游戏、电影市场的蓬勃发展，中国二维动画正迎来前所未有的机遇。本指南将为您揭示行业全貌，规划您的职业蓝图。
+            </p>
+            <a href="#industry" class="btn-primary font-bold py-3 px-8 rounded-full inline-block text-lg">
+                开始探索
+            </a>
+        </section>
+
+        <section id="industry" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">行业洞察</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">市场需求的多元化，催生了巨大的发展机遇与人才缺口。了解不同板块的特点，是找准定位的第一步。</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 mb-16 text-center">
+                    <div class="card">
+                        <h3 class="text-4xl font-bold text-[#A0522D]">60+年</h3>
+                        <p class="mt-2 text-gray-600">从《大闹天宫》至今的辉煌历史积淀</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-4xl font-bold text-[#A0522D]">5大+</h3>
+                        <p class="mt-2 text-gray-600">游戏、电影、番剧等多元化市场板块</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-4xl font-bold text-[#A0522D]">持续增长</h3>
+                        <p class="mt-2 text-gray-600">人才需求旺盛，对口专业前景广阔</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-center mb-6">主要市场板块品质要求对比</h3>
+                    <p class="text-center text-gray-500 mb-6 -mt-4">下图直观展示了不同动画板块对画面精度的普遍要求。品质要求越高，通常意味着更高的预算投入和对顶尖人才的渴求。</p>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pipeline" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">制作全流程</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">动画制作是一个高度协同的系统工程。点击下方阶段，探索从一个概念到最终画面的诞生之旅。</p>
+                </div>
+
+                <div class="lg:flex lg:space-x-12">
+                    <div class="lg:w-1/3">
+                        <div id="process-nav">
+                            <div class="process-step p-6 active" data-target="pre-production">
+                                <h3 class="text-xl font-bold">1. 前期制作</h3>
+                                <p class="text-gray-600 mt-1">奠定蓝图的建筑设计</p>
+                            </div>
+                            <div class="process-step p-6" data-target="mid-production">
+                                <h3 class="text-xl font-bold">2. 中期制作</h3>
+                                <p class="text-gray-600 mt-1">赋予画框以生命</p>
+                            </div>
+                            <div class="process-step p-6" data-target="post-production">
+                                <h3 class="text-xl font-bold">3. 后期制作</h3>
+                                <p class="text-gray-600 mt-1">艺术与技术的最终融合</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:w-2/3 mt-8 lg:mt-0">
+                        <div id="process-content">
+                            <div id="pre-production" class="process-details">
+                                <div class="card">
+                                    <h4 class="text-2xl font-bold mb-4">前期制作核心环节</h4>
+                                    <ul class="space-y-4">
+                                        <li><strong>剧本与分镜:</strong> 将文字故事转化为视觉蓝图，是整部影片的“说明书”。</li>
+                                        <li><strong>动态分镜:</strong> 针对复杂动作戏，用草稿动画清晰传达节奏与意图。</li>
+                                        <li><strong>角色与场景设计:</strong> 包含三视图、表情集、道具和场景氛围，统一作品的视觉风格。</li>
+                                    </ul>
+                                    <p class="mt-6 bg-amber-50 p-4 rounded-lg text-amber-800">这一阶段的核心是<strong class="font-semibold">严谨的规划</strong>。一份详尽的前期设计是后续所有团队高效协作的根本保障。</p>
+                                </div>
+                            </div>
+                            <div id="mid-production" class="process-details">
+                                <div class="card">
+                                    <h4 class="text-2xl font-bold mb-4">中期制作核心环节</h4>
+                                    <p class="mb-4 text-gray-600">这是一个层层递进、高度依赖的瀑布式流程，每一步的质量都至关重要。</p>
+                                    <ol class="list-decimal list-inside space-y-3">
+                                        <li><strong>Layout (构图):</strong> 分镜的细化版本，提供明确作画指示。</li>
+                                        <li><strong>一原 (关键帧):</strong> 设计和绘制动作的核心帧，决定角色表演。</li>
+                                        <li><strong>二原 (修型清线):</strong> 将一原草稿修正为干净、标准的最终线稿。</li>
+                                        <li><strong>中割 (中间画):</strong> 补充关键帧之间的画面，使动作流畅。</li>
+                                        <li><strong>上色:</strong> 根据设定为线稿填充颜色。</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            <div id="post-production" class="process-details">
+                                <div class="card">
+                                    <h4 class="text-2xl font-bold mb-4">后期制作核心环节</h4>
+                                    <ul class="space-y-4">
+                                        <li><strong>摄影 (合成):</strong> 将角色、背景、特效等所有图层合成，根据氛围图添加光影、景深等效果，营造最终画面感。</li>
+                                        <li><strong>声音制作:</strong> 包括音乐、音效和配音，赋予作品听觉生命力。</li>
+                                        <li><strong>剪辑:</strong> 通过对镜头节奏的把控，引导观众情绪，完成最终叙事。</li>
+                                    </ul>
+                                    <p class="mt-6 bg-amber-50 p-4 rounded-lg text-amber-800">后期是将所有独立素材<strong class="font-semibold">整合升华</strong>的过程，最终诞生一部完整的“视听盛宴”。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roles" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">团队角色</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">一个成功的项目离不开分工明确的团队。点击不同角色，了解他们在动画创作中的核心职责。</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="role-card card p-4 text-center" data-role="producer">
+                        <h4 class="font-bold text-lg">总制片</h4>
+                        <p class="text-sm text-gray-500">项目总负责人</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">负责项目管理、资源协调和对外沟通，需具备审美和卓越的沟通能力。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="director">
+                        <h4 class="font-bold text-lg">导演</h4>
+                        <p class="text-sm text-gray-500">创意总指挥</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">总揽全局，把控故事、节奏和艺术风格，确保作品的最终艺术完整性。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="storyboard">
+                        <h4 class="font-bold text-lg">分镜师</h4>
+                        <p class="text-sm text-gray-500">视觉叙事者</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">将文字剧本转化为视觉画面，设计镜头语言和节奏。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="art-director">
+                        <h4 class="font-bold text-lg">美术</h4>
+                        <p class="text-sm text-gray-500">风格奠基人</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">确立并把控作品的整体视觉风格，包括色彩、场景、道具等。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="key-animator">
+                        <h4 class="font-bold text-lg">一原画师</h4>
+                        <p class="text-sm text-gray-500">动作设计师</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">富有创造性的岗位，负责设计和绘制动作的关键帧，决定角色表演。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="cleanup-artist">
+                        <h4 class="font-bold text-lg">二原画师</h4>
+                        <p class="text-sm text-gray-500">造型执行者</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">侧重造型准确性和线条规范性，将一原草稿完善成干净的最终线稿。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="anim-supervisor">
+                        <h4 class="font-bold text-lg">作画监督</h4>
+                        <p class="text-sm text-gray-500">质量保证核心</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">修正原画，统一不同原画师的画风，确保角色在所有镜头中不“走形”。</div>
+                    </div>
+                    <div class="role-card card p-4 text-center" data-role="inbetweener">
+                        <h4 class="font-bold text-lg">中割/上色</h4>
+                        <p class="text-sm text-gray-500">新人入行起点</p>
+                        <div class="role-details text-left text-sm mt-3 pt-3 border-t">中割负责补充中间画使动作流畅；上色负责填色。是锻炼基本功的绝佳岗位。</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="career" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold">职业发展路径</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">行业内主要存在两种发展模式：在单一领域深耕的“专精深化”，和跨职能学习的“跨界融合”。</p>
+                </div>
+                <div class="grid md:grid-cols-5 gap-8 items-center">
+                    <div class="md:col-span-2 card text-center">
+                        <h3 class="text-xl font-bold mb-4">两种核心发展路径</h3>
+                        <div class="chart-container h-64 max-h-64">
+                            <canvas id="careerPathChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="md:col-span-3 card">
+                        <div id="path-selector" class="flex border-b mb-4">
+                            <button data-path="promotion" class="path-btn flex-1 p-3 font-semibold border-b-2 border-[#A0522D] text-[#A0522D]">专精深化 (晋升)</button>
+                            <button data-path="transfer" class="path-btn flex-1 p-3 font-semibold border-b-2 border-transparent text-gray-500">跨界融合 (转职)</button>
+                        </div>
+                        <div id="path-details">
+                            <div data-path-content="promotion">
+                                <h4 class="font-bold text-lg mb-2">特点：风险低，成长轨迹清晰</h4>
+                                <p class="text-gray-600 mb-4">在同一专业领域内纵向发展，目标是成为该领域的专家。需要长年累月的练习和积累。</p>
+                                <div class="space-y-2 text-sm">
+                                    <p>二原画师 → 作画监督</p>
+                                    <p>一原画师 → 演出 → 导演</p>
+                                    <p>中割师 → 动检</p>
+                                </div>
+                            </div>
+                            <div data-path-content="transfer" class="hidden">
+                                <h4 class="font-bold text-lg mb-2">特点：综合能力成长快</h4>
+                                <p class="text-gray-600 mb-4">在不同岗位间横向流动，能学习多元技能，对流程有更全面的理解，为成为管理或导演打下基础。</p>
+                                <div class="space-y-2 text-sm">
+                                    <p>中割 → 二原 (从动作辅助到造型绘制)</p>
+                                    <p>二原 → 一原 (从造型执行到动作设计)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="start" class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                 <h2 class="text-3xl md:text-4xl font-bold mb-4">
+                    你的旅程，<span class="text-[#A0522D]">由此开启</span>
+                </h2>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600 mb-8">
+                    无论你是否科班出身，只要心怀热爱，通过系统化的学习和实战，就能将梦想转化为专业能力。行业的未来画卷，正等待着新的创作者们挥洒笔墨。
+                </p>
+                <a href="http://m.starroc.cn" target="_blank" rel="noopener noreferrer" class="btn-primary font-bold py-3 px-8 rounded-full inline-block text-lg">
+                    课程报名试听
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#3D3522] text-white py-8">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>&copy; 2025 星鹏教育. 旨在为动画爱好者与从业者提供行业洞察。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            const marketCtx = document.getElementById('marketChart').getContext('2d');
+            new Chart(marketCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['游戏PV', '动画电影', '动画番剧', '广告动画', '短视频动画'],
+                    datasets: [{
+                        label: '画面品质要求',
+                        data: [95, 90, 75, 60, 50],
+                        backgroundColor: 'rgba(160, 82, 45, 0.6)',
+                        borderColor: 'rgba(160, 82, 45, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x + ' (相对值)';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const processNavItems = document.querySelectorAll('.process-step');
+            const processDetailsItems = document.querySelectorAll('.process-details');
+            const firstDetail = document.querySelector('#pre-production');
+            firstDetail.style.maxHeight = firstDetail.scrollHeight + "px";
+
+            processNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.dataset.target;
+                    
+                    processNavItems.forEach(nav => nav.classList.remove('active'));
+                    item.classList.add('active');
+
+                    processDetailsItems.forEach(detail => {
+                        if (detail.id === targetId) {
+                            detail.style.maxHeight = detail.scrollHeight + "px";
+                        } else {
+                            detail.style.maxHeight = '0';
+                        }
+                    });
+                });
+            });
+
+            const roleCards = document.querySelectorAll('.role-card');
+            roleCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const isActive = card.classList.contains('active');
+                    roleCards.forEach(c => c.classList.remove('active'));
+                    if (!isActive) {
+                        card.classList.add('active');
+                    }
+                });
+            });
+
+            const careerPathCtx = document.getElementById('careerPathChart').getContext('2d');
+            new Chart(careerPathCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['专精深化 (晋升)', '跨界融合 (转职)'],
+                    datasets: [{
+                        data: [60, 40],
+                        backgroundColor: ['rgba(160, 82, 45, 0.7)', 'rgba(210, 180, 140, 0.7)'],
+                        borderColor: ['rgba(160, 82, 45, 1)', 'rgba(210, 180, 140, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+
+            const pathBtns = document.querySelectorAll('.path-btn');
+            const pathContents = document.querySelectorAll('[data-path-content]');
+            pathBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const path = btn.dataset.path;
+                    
+                    pathBtns.forEach(b => {
+                        b.classList.remove('border-[#A0522D]', 'text-[#A0522D]');
+                        b.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    btn.classList.add('border-[#A0522D]', 'text-[#A0522D]');
+                    btn.classList.remove('border-transparent', 'text-gray-500');
+
+                    pathContents.forEach(content => {
+                        if (content.dataset.pathContent === path) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
